@@ -16,46 +16,50 @@ var apple;
 let score = 0;
 let dead = false;
 
-var game = new Phaser.Game(width, height, Phaser.AUTO, '', {
-    preload: preload,
-    create: create,
-    update: update
-});
-
-
+var config = {
+    type: Phaser.AUTO,
+    width: width,
+    height: height,
+    scale: {
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+var game = new Phaser.Game(config);
 
 function preload() {
-    game.load.image('food', '../img/food.png');
-    game.load.image('body', '../img/ground.png');
-    game.load.audio('dead', '../audio/dead.mp3');
-    game.load.audio('eat', '../audio/eat.mp3');
-    game.load.audio('up', '../audio/up.mp3');
-    game.load.audio('right', '../audio/right.mp3');
-    game.load.audio('left', '../audio/left.mp3');
-    game.load.audio('down', '../audio/down.mp3');
+    this.load.image('food', '../img/food.png');
+    this.load.image('body', '../img/ground.png');
+    this.load.audio('dead', '../audio/dead.mp3');
+    this.load.audio('eat', '../audio/eat.mp3');
+    this.load.audio('up', '../audio/up.mp3');
+    this.load.audio('right', '../audio/right.mp3');
+    this.load.audio('left', '../audio/left.mp3');
+    this.load.audio('down', '../audio/down.mp3');
 }
 
 function create() {
-    game.scale.pageAlignHorizontally = true;
-    game.scale.pageAlignVertically = true;
+    this.add.image(0, 0, 'body').setOrigin(0);
 
-    game.add.image(0, 0, 'body');
-
-    gameText = game.add.text(2 * box, 0.5 * box, score, {
+    gameText = this.add.text(2 * box, 0.5 * box, score, {
         font: "45px Arial",
         fill: "#fff"
     });
 
-    newApple();
+    newApple(this);
 
     snakeHead = {
         x: 9 * box,
         y: 10 * box,
         oldHead: null
     };
-    newHead(snakeHead);
+    newHead(this, snakeHead);
 
-    cursors = game.input.keyboard.createCursorKeys();
+    cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update() {
@@ -64,17 +68,23 @@ function update() {
     gameText.text = score;
     updateDirection();
     if (frameCounter == gameSpeed) {
-        movePlayer();
+        movePlayer(this);
         frameCounter = 0;
     }
 }
 
-function newHead(head) {
-
-    var rectGraphic = game.add.graphics()
-    rectGraphic.beginFill(0x008000);
-    rectGraphic.drawRect(head.x, head.y, box, box);
-
+function newHead(scene, head) {
+    var rectGraphic = scene.add.graphics({
+        lineStyle: {
+            width: 1,
+            color: 0xffffff
+        },
+        fillStyle: {
+            color: 0x008000
+        }
+    });
+    rectGraphic.fillRect(head.x, head.y, box, box);
+    rectGraphic.strokeRect(head.x, head.y, box, box);
     head.rect = rectGraphic;
 }
 
@@ -91,14 +101,14 @@ function removeTail(head) {
     return false;
 }
 
-function newApple() {
-    var ranX = (game.math.between(0, boxX - 1) * box) + startX;
-    var ranY = (game.math.between(0, boxY - 1) * box) + startY;
+function newApple(scene) {
+    var ranX = (Phaser.Math.RND.between(0, boxX - 1) * box) + startX;
+    var ranY = (Phaser.Math.RND.between(0, boxY - 1) * box) + startY;
 
 
-    var a = game.add.image(ranX, ranY, 'food');
-    a.width = box;
-    a.height = box;
+    var a = scene.add.image(ranX, ranY, 'food').setOrigin(0);
+    a.displayWidth = box;
+    a.displayHeight = box;
 
     apple = {
         x: ranX,
@@ -122,7 +132,7 @@ function updateDirection() {
     }
 }
 
-function movePlayer() {
+function movePlayer(scene) {
     if (!playerDirection || dead) {
         return;
     }
@@ -158,13 +168,13 @@ function movePlayer() {
         return;
     }
 
-    newHead(snakeHead);
+    newHead(scene, snakeHead);
 
     if (apple.x == snakeX && apple.y == snakeY) {
         score++;
         game.sound.play('eat');
         apple.img.destroy();
-        newApple();
+        newApple(scene);
     } else {
         removeTail(snakeHead)
     }
