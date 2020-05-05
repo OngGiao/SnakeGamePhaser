@@ -22,6 +22,8 @@ var game = new Phaser.Game(width, height, Phaser.AUTO, '', {
     update: update
 });
 
+
+
 function preload() {
     game.load.image('food', '../img/food.png');
     game.load.image('body', '../img/ground.png');
@@ -34,6 +36,9 @@ function preload() {
 }
 
 function create() {
+    game.scale.pageAlignHorizontally = true;
+    game.scale.pageAlignVertically = true;
+
     game.add.image(0, 0, 'body');
 
     gameText = game.add.text(2 * box, 0.5 * box, score, {
@@ -54,6 +59,7 @@ function create() {
 }
 
 function update() {
+
     frameCounter++;
     gameText.text = score;
     updateDirection();
@@ -102,16 +108,16 @@ function newApple() {
 }
 
 function updateDirection() {
-    if (cursors.right.isDown) {
+    if (cursors.right.isDown && playerDirection != "LEFT") {
         playerDirection = "RIGHT";
     }
-    if (cursors.left.isDown) {
+    if (cursors.left.isDown && playerDirection != "RIGHT") {
         playerDirection = "LEFT";
     }
-    if (cursors.up.isDown) {
+    if (cursors.up.isDown && playerDirection != "DOWN") {
         playerDirection = "UP";
     }
-    if (cursors.down.isDown) {
+    if (cursors.down.isDown && playerDirection != "UP") {
         playerDirection = "DOWN";
     }
 }
@@ -124,16 +130,16 @@ function movePlayer() {
     let snakeX = snakeHead.x;
     let snakeY = snakeHead.y;
 
-    if (playerDirection == "LEFT" && playerDirection != "RIGHT") {
+    if (playerDirection == "LEFT") {
         game.sound.play('left');
         snakeX -= box;
-    } else if (playerDirection == "UP" && playerDirection != "DOWN") {
+    } else if (playerDirection == "UP") {
         game.sound.play('up');
         snakeY -= box;
-    } else if (playerDirection == "RIGHT" && playerDirection != "LEFT") {
+    } else if (playerDirection == "RIGHT") {
         game.sound.play('right');
         snakeX += box;
-    } else if (playerDirection == "DOWN" && playerDirection != "UP") {
+    } else if (playerDirection == "DOWN") {
         game.sound.play('down');
         snakeY += box;
     }
